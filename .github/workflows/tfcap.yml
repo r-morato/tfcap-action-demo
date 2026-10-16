@@ -17,7 +17,7 @@ jobs:
         working-directory: infra
         run: terraform init -backend=false -input=false
       - name: tfcap verify
-        uses: r-morato/tfcap@v0
+        uses: r-morato/tfcap@v0.1.2
         with:
           working-directory: infra
           mode: verify
