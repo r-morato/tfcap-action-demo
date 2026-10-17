@@ -18,6 +18,8 @@ jobs:
       security-events: write # code-scanning alerts
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
       - run: terraform init -backend=false -input=false
         working-directory: infra
@@ -25,21 +27,41 @@ jobs:
         with:
           working-directory: infra
 
-  approve:                  # runs when a reviewer adds the tfcap-approved label
+  approve-prepare:          # runs the PR's code, with a read-only token
     if: github.event.action == 'labeled' && github.event.label.name == 'tfcap-approved'
     runs-on: ubuntu-latest
     permissions:
-      contents: write       # commit the updated lock file to the PR branch
+      contents: read
+      pull-requests: write
+    outputs:
+      approved: ${{ steps.tfcap.outputs.approved }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+      - run: terraform init -backend=false -input=false
+        working-directory: infra
+      - id: tfcap
+        uses: r-morato/tfcap@v0
+        with:
+          working-directory: infra
+          mode: approve-prepare
+
+  approve-commit:           # has write access, never runs the PR's code
+    needs: approve-prepare
+    if: needs.approve-prepare.outputs.approved == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write       # commit the lock file to the PR branch
       pull-requests: write
       statuses: write       # mark the check as passed on that commit
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.head_ref }}
-      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
-      - run: terraform init -backend=false -input=false
-        working-directory: infra
       - uses: r-morato/tfcap@v0
         with:
           working-directory: infra
-          mode: approve
+          mode: approve-commit
