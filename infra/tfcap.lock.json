@@ -4,9 +4,22 @@
   "modules": [
     {
       "key": "network",
-      "source": "git::https://github.com/r-morato/tfcap-action-demo.git//modules/network?ref=b96001e743ef19ce2408902286498303f745faa5",
-      "hash": "tfcap1:218db906a5e70c0d2d7665ab5d38cf75bfe56e25fc396f4e4b227ee209d119c1",
-      "capabilities": []
+      "source": "git::https://github.com/r-morato/tfcap-action-demo.git//modules/network?ref=05fcb42637fe77a1424d8441b1cff02fef127f87",
+      "hash": "tfcap1:f2b1fe140a812b8902d1e31aa218847c8975d92311e625df334a2f57e75ed7d6",
+      "capabilities": [
+        {
+          "fp": "9373f92ed844c582",
+          "rule": "TFCAP-NET-001",
+          "address": "data.http.aws_ip_ranges",
+          "detail": "host:ip-ranges.amazonaws.com"
+        },
+        {
+          "fp": "bca22b7ead4f88aa",
+          "rule": "TFCAP-NET-002",
+          "address": "data.http.aws_ip_ranges",
+          "detail": "host:ip-ranges.amazonaws.com"
+        }
+      ]
     }
   ]
 }
